@@ -118,8 +118,11 @@ public partial class Form1 : Form
             stopDate = DateTime.Now;
             sw.Reset();
 
+            //Get additional comment from user
+            var comment = Interaction.InputBox("Enter a comment for this time entry", "Comment", string.Empty);
+
             //Format the time into csv
-            var timeDataFrame = $"{startDate:yyyy-MM-dd HH:mm:ss},{stopDate:yyyy-MM-dd HH:mm:ss},{workingFor.Hours:00}:{workingFor.Minutes:00}:{workingFor.Seconds:00}";
+            var timeDataFrame = $"{startDate:yyyy-MM-dd},{startDate:HH:mm:ss},{stopDate:HH:mm:ss},{workingFor.Hours:00}:{workingFor.Minutes:00}:{workingFor.Seconds:00},{comment}";
 
             //Save to documents
             File.AppendAllText(selectedTimeSheetFile, timeDataFrame + Environment.NewLine);

@@ -47,7 +47,7 @@
             // 
             contextMenuStrip.Items.AddRange(new ToolStripItem[] { timeSheetFileSelectToolStripMenuItem, toolStripSeparator3, startStopToolStripMenuItem, pauseToolStripMenuItem, toolStripSeparator2, clockLabelStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
             contextMenuStrip.Name = "contextMenuStrip";
-            contextMenuStrip.Size = new Size(188, 132);
+            contextMenuStrip.Size = new Size(188, 154);
             contextMenuStrip.Opening += contextMenuStrip_Opening;
             // 
             // timeSheetFileSelectToolStripMenuItem
