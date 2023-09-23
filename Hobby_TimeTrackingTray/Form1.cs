@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Hobby_TimeTrackingTray.Properties;
 using Microsoft.VisualBasic;
 using Microsoft.Win32;
 
@@ -33,7 +34,7 @@ public partial class Form1 : Form
         SetStartup();
         AssureTimeSheetFolder();
 
-        lastSelectedTimeSheetFile = Settings.Default.lastSelectedTimeSheetFile;
+        lastSelectedTimeSheetFile = Settings.Default.LastSelectedTimeSheetFile;
         if (string.IsNullOrEmpty(lastSelectedTimeSheetFile))
         {
             timeSheetFileSelectToolStripMenuItem.Text = @"Select time sheet file";
@@ -113,23 +114,7 @@ public partial class Form1 : Form
     {
         if (sw.IsRunning)
         {
-            //Stop the clock and save the time
-            var workingFor = sw.Elapsed;
-            stopDate = DateTime.Now;
-            sw.Reset();
-
-            //Get additional comment from user
-            var comment = Interaction.InputBox("Enter a comment for this time entry", "Comment", string.Empty);
-
-            //Format the time into csv
-            var timeDataFrame = $"{startDate:yyyy-MM-dd},{startDate:HH:mm:ss},{stopDate:HH:mm:ss},{workingFor.Hours:00}:{workingFor.Minutes:00}:{workingFor.Seconds:00},{comment}";
-
-            //Save to documents
-            File.AppendAllText(selectedTimeSheetFile, timeDataFrame + Environment.NewLine);
-
-            startStopToolStripMenuItem.Text = @"Start";
-
-            pauseToolStripMenuItem.Enabled = false;
+            StopClock();
         }
         else
         {
@@ -141,6 +126,39 @@ public partial class Form1 : Form
 
             pauseToolStripMenuItem.Enabled = true;
         }
+    }
+
+    /// <returns>True if saved data and stopped clock, False if didn't stop (didn't have a selected timesheet)</returns>
+    private bool StopClock()
+    {
+        if (string.IsNullOrEmpty(selectedTimeSheetFile))
+        {
+            //Ask user to select a time sheet file
+            MessageBox.Show(@"Please select a time sheet file first", @"Save", MessageBoxButtons.OK);
+            contextMenuStrip.Show();
+            contextMenuStrip.Items[@"timeSheetFileSelectToolStripMenuItem"].Select();
+            return false;
+        }
+
+        //Stop the clock and save the time
+        var workingFor = sw.Elapsed;
+        stopDate = DateTime.Now;
+        sw.Reset();
+
+        //Get additional comment from user
+        var comment = Interaction.InputBox("Enter a comment for this time entry", "Comment", string.Empty);
+        comment = string.IsNullOrEmpty(comment) ? "-" : comment;
+
+        //Format the time into csv
+        var timeDataFrame = $"{startDate:yyyy-MM-dd},{startDate:HH:mm:ss},{stopDate:HH:mm:ss},{workingFor.Hours:00}:{workingFor.Minutes:00}:{workingFor.Seconds:00},{comment}";
+        //Save to documents
+        File.AppendAllText(selectedTimeSheetFile, timeDataFrame + Environment.NewLine);
+
+        startStopToolStripMenuItem.Text = @"Start";
+
+        pauseToolStripMenuItem.Enabled = false;
+        
+        return true;
     }
 
     private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -158,17 +176,37 @@ public partial class Form1 : Form
     }
 
     private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        => Exit();
+    {
+        var canExit = Exit();
+        if (canExit)
+        {
+            Application.Exit();
+        }
+    }
 
     private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        => Exit();
-
-    private void Exit()
     {
-        //Persist the selected time sheet
-        Settings.Default.lastSelectedTimeSheetFile = selectedTimeSheetFile;
+        var canExit = Exit();
+        e.Cancel = !canExit;
+    }
 
-        Application.Exit();
+    ///<returns>True if the application can exit, False if it can't</returns>
+    private bool Exit()
+    {
+        if (sw.IsRunning)
+        {
+            var didStop = StopClock();
+            if (!didStop)
+            {
+                return false;
+            }
+        }
+
+        //Persist the selected time sheet
+        Settings.Default.LastSelectedTimeSheetFile = selectedTimeSheetFile;
+        Settings.Default.Save();
+
+        return true;
     }
 
     private void contextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)

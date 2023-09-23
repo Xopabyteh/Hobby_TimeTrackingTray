@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Hobby_TimeTrackingTray {
+namespace Hobby_TimeTrackingTray.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -26,12 +26,12 @@ namespace Hobby_TimeTrackingTray {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string lastSelectedTimeSheetFile {
+        public string LastSelectedTimeSheetFile {
             get {
-                return ((string)(this["lastSelectedTimeSheetFile"]));
+                return ((string)(this["LastSelectedTimeSheetFile"]));
             }
             set {
-                this["lastSelectedTimeSheetFile"] = value;
+                this["LastSelectedTimeSheetFile"] = value;
             }
         }
     }
