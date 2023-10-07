@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Discord;
 using Hobby_TimeTrackingTray.Properties;
 using Microsoft.VisualBasic;
 using Microsoft.Win32;
@@ -10,6 +11,7 @@ public partial class Form1 : Form
     private Stopwatch sw;
     private DateTime startDate;
     private DateTime stopDate;
+    private bool isPaused;
 
     private string selectedTimeSheetFile;
     /// <summary>
@@ -18,20 +20,58 @@ public partial class Form1 : Form
     private string lastSelectedTimeSheetFile;
     private static readonly string TimeSheetFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Time tracking");
 
+    //private long discordApplicationId = 1160159654429597706;
+    //private Discord.Discord discord;
+    //private Discord.ActivityManager? discordActivityManager;
+
     public Form1()
     {
         InitializeComponent();
 
+        SetStartup();
+
+        //InitializeDiscord();
+        InitializeTimeTracking();
+    }
+
+
+    //private void InitializeDiscord()
+    //{
+    //    discord = new Discord.Discord(discordApplicationId, (ulong)Discord.CreateFlags.NoRequireDiscord);
+
+    //    try
+    //    {
+    //        discord.RunCallbacks();
+    //        discordActivityManager = discord.GetActivityManager();
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        MessageBox.Show("Couldn't connect to discord");
+    //    }
+    //}
+
+    //Make the application start on startup
+    private void SetStartup()
+    {
+        var rk = Registry.CurrentUser.OpenSubKey
+            ("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true)!;
+
+        rk.SetValue("Hobby_TimeTrackingTray", Application.ExecutablePath);
+    }
+
+    //Load timesheets and Initialize context menu strip
+    private void InitializeTimeTracking()
+    {
         notifyIcon.BalloonTipTitle = @"Time tracking";
         notifyIcon.Text = @"Time tracking ";
         notifyIcon.Visible = true;
+        notifyIcon.Icon = Icons.ClockAdd;
 
         sw = new();
         clockLabelStripMenuItem.Enabled = false;
 
         pauseToolStripMenuItem.Enabled = false;
 
-        SetStartup();
         AssureTimeSheetFolder();
 
         lastSelectedTimeSheetFile = Settings.Default.LastSelectedTimeSheetFile;
@@ -101,31 +141,63 @@ public partial class Form1 : Form
         return Directory.GetFiles(TimeSheetFolder, "*.csv");
     }
 
-    //Make the application start on startup
-    private void SetStartup()
-    {
-        var rk = Registry.CurrentUser.OpenSubKey
-            ("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true)!;
-
-        rk.SetValue("Hobby_TimeTrackingTray", Application.ExecutablePath);
-    }
-
     private void startStopToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (sw.IsRunning)
+        if (sw.IsRunning || isPaused)
         {
+            isPaused = false;
             StopClock();
         }
         else
         {
-            //Start the clock
-            startDate = DateTime.Now;
-
-            sw.Start();
-            startStopToolStripMenuItem.Text = @"Stop";
-
-            pauseToolStripMenuItem.Enabled = true;
+            StartClock();
         }
+    }
+
+    private void StartClock()
+    {
+        startDate = DateTime.Now;
+
+        sw.Start();
+        startStopToolStripMenuItem.Text = @"Stop";
+
+        pauseToolStripMenuItem.Enabled = true;
+        
+        notifyIcon.Icon = Icons.ClockRunning;
+
+        //if (discordActivityManager is not null)
+        //{
+        //    var details = string.IsNullOrEmpty(selectedTimeSheetFile) ?
+        //        "Working on something" :
+        //        $"Working on {Path.GetFileNameWithoutExtension(selectedTimeSheetFile)}";
+
+        //    var activity = new Discord.Activity
+        //    {
+        //        ApplicationId = discordApplicationId,
+        //        Name = "TimeTracTray",
+        //        State = "Working",
+        //        Timestamps =
+        //        {
+        //            Start = DateTimeOffset.Now.ToUnixTimeSeconds()
+        //        },
+        //        Details = details
+        //    };
+
+        //    try
+        //    {
+        //        discordActivityManager.UpdateActivity(activity, res =>
+        //        {
+        //            if (res != Result.Ok)
+        //            {
+        //                MessageBox.Show("Couldn't connect to discord");
+        //            }
+        //        });
+        //    }
+        //    catch
+        //    {
+        //        MessageBox.Show("Couldn't connect to discord");
+        //    }
+        //}
     }
 
     /// <returns>True if saved data and stopped clock, False if didn't stop (didn't have a selected timesheet)</returns>
@@ -158,20 +230,31 @@ public partial class Form1 : Form
 
         pauseToolStripMenuItem.Enabled = false;
         
+        notifyIcon.Icon = Icons.ClockAdd;
+        pauseToolStripMenuItem.Text = @"Pause";
+
         return true;
     }
 
     private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (sw.IsRunning)
+        if (!isPaused)
         {
+            //Pause
+
+            isPaused = true;
             sw.Stop();
             pauseToolStripMenuItem.Text = @"Resume";
+            notifyIcon.Icon = Icons.ClockWarning;
         }
         else
         {
+            //Resume
+
+            isPaused = false;
             sw.Start();
             pauseToolStripMenuItem.Text = @"Pause";
+            notifyIcon.Icon = Icons.ClockRunning;
         }
     }
 
@@ -219,5 +302,16 @@ public partial class Form1 : Form
     {
         //Hide the form so the window doesn't show up
         Hide();
+    }
+
+    //Hide from alt+tab
+    protected override CreateParams CreateParams
+    {
+        get
+        {
+            var @params = base.CreateParams;
+            @params.ExStyle |= 0x00000080;
+            return @params;
+        }
     }
 }
