@@ -40,14 +40,16 @@
             toolStripSeparator1 = new ToolStripSeparator();
             exitToolStripMenuItem = new ToolStripMenuItem();
             notifyIcon = new NotifyIcon(components);
+            updatexlsxToolStripMenuItem = new ToolStripMenuItem();
+            toolStripSeparator4 = new ToolStripSeparator();
             contextMenuStrip.SuspendLayout();
             SuspendLayout();
             // 
             // contextMenuStrip
             // 
-            contextMenuStrip.Items.AddRange(new ToolStripItem[] { timeSheetFileSelectToolStripMenuItem, toolStripSeparator3, startStopToolStripMenuItem, pauseToolStripMenuItem, toolStripSeparator2, clockLabelStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
+            contextMenuStrip.Items.AddRange(new ToolStripItem[] { timeSheetFileSelectToolStripMenuItem, toolStripSeparator3, startStopToolStripMenuItem, pauseToolStripMenuItem, toolStripSeparator2, clockLabelStripMenuItem, toolStripSeparator1, updatexlsxToolStripMenuItem, toolStripSeparator4, exitToolStripMenuItem });
             contextMenuStrip.Name = "contextMenuStrip";
-            contextMenuStrip.Size = new Size(188, 154);
+            contextMenuStrip.Size = new Size(188, 182);
             contextMenuStrip.Opening += contextMenuStrip_Opening;
             // 
             // timeSheetFileSelectToolStripMenuItem
@@ -105,6 +107,18 @@
             notifyIcon.Text = "notifyIcon";
             notifyIcon.Visible = true;
             // 
+            // updatexlsxToolStripMenuItem
+            // 
+            updatexlsxToolStripMenuItem.Name = "updatexlsxToolStripMenuItem";
+            updatexlsxToolStripMenuItem.Size = new Size(187, 22);
+            updatexlsxToolStripMenuItem.Text = "Update .xlsx";
+            updatexlsxToolStripMenuItem.Click += updatexlsxToolStripMenuItem_Click;
+            // 
+            // toolStripSeparator4
+            // 
+            toolStripSeparator4.Name = "toolStripSeparator4";
+            toolStripSeparator4.Size = new Size(184, 6);
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -138,5 +152,7 @@
         private ToolStripMenuItem clockLabelStripMenuItem;
         private ToolStripMenuItem timeSheetFileSelectToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator3;
+        private ToolStripMenuItem updatexlsxToolStripMenuItem;
+        private ToolStripSeparator toolStripSeparator4;
     }
 }

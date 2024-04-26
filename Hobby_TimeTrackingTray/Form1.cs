@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Discord;
 using Hobby_TimeTrackingTray.Properties;
 using Microsoft.VisualBasic;
 using Microsoft.Win32;
@@ -18,7 +17,7 @@ public partial class Form1 : Form
     /// Persist the last selected time sheet file, so that it can be automatically selected again on next startup
     /// </summary>
     private string lastSelectedTimeSheetFile;
-    private static readonly string TimeSheetFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Time tracking");
+    public static readonly string TimeSheetFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Time tracking");
 
     //private long discordApplicationId = 1160159654429597706;
     //private Discord.Discord discord;
@@ -28,30 +27,15 @@ public partial class Form1 : Form
     {
         InitializeComponent();
 
-        SetStartup();
+        MakeApplicationRunOnStartup();
 
-        //InitializeDiscord();
         InitializeTimeTracking();
     }
 
 
-    //private void InitializeDiscord()
-    //{
-    //    discord = new Discord.Discord(discordApplicationId, (ulong)Discord.CreateFlags.NoRequireDiscord);
-
-    //    try
-    //    {
-    //        discord.RunCallbacks();
-    //        discordActivityManager = discord.GetActivityManager();
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        MessageBox.Show("Couldn't connect to discord");
-    //    }
-    //}
 
     //Make the application start on startup
-    private void SetStartup()
+    private void MakeApplicationRunOnStartup()
     {
         var rk = Registry.CurrentUser.OpenSubKey
             ("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true)!;
@@ -162,7 +146,7 @@ public partial class Form1 : Form
         startStopToolStripMenuItem.Text = @"Stop";
 
         pauseToolStripMenuItem.Enabled = true;
-        
+
         notifyIcon.Icon = Icons.ClockRunning;
 
         //if (discordActivityManager is not null)
@@ -229,7 +213,7 @@ public partial class Form1 : Form
         startStopToolStripMenuItem.Text = @"Start";
 
         pauseToolStripMenuItem.Enabled = false;
-        
+
         notifyIcon.Icon = Icons.ClockAdd;
         pauseToolStripMenuItem.Text = @"Pause";
 
@@ -302,6 +286,11 @@ public partial class Form1 : Form
     {
         //Hide the form so the window doesn't show up
         Hide();
+    }
+
+    private void updatexlsxToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        ExcelConverter.TimeSheetToExcel(selectedTimeSheetFile);
     }
 
     //Hide from alt+tab
