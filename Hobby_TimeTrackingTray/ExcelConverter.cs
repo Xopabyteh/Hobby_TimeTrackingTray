@@ -7,11 +7,7 @@ public class ExcelConverter
     public static void TimeSheetToExcel(
         string timeSheetPath)
     {
-        var app = new Excel.ApplicationClass
-        {
-            Visible = true
-        };
-
+        var app = new Excel.ApplicationClass();
         var workbook = app.Workbooks.Add();
         var sheet = (Excel.Worksheet) workbook.ActiveSheet;
 
@@ -47,19 +43,34 @@ public class ExcelConverter
         var table = sheet.ListObjects.Add(Excel.XlListObjectSourceType.xlSrcRange, tableRange, null, Excel.XlYesNoGuess.xlYes);
         table.Name = "TimeSheet";
 
-        // Add work time sum
+        // Add work time sums
         sheet.Cells[tableRows + 2, 1] = "Total sessions";
         sheet.Cells[tableRows + 3, 1] = $"=COUNT(A2:A{tableRows + 1})";
+        sheet.Range[$"A{tableRows + 3}", $"A{tableRows + 3}"].NumberFormat = "0";
+
+        sheet.Cells[tableRows + 4, 1] = "Total days";
+        sheet.Cells[tableRows + 5, 1] = $"=COUNTA(UNIQUE(A2:A{tableRows + 1}))";
         sheet.Range[$"A{tableRows + 3}", $"A{tableRows + 3}"].NumberFormat = "0";
 
         sheet.Cells[tableRows + 2, 4] = "Total work time";
         sheet.Cells[tableRows + 3, 4] = $"=SUM(D2:D{tableRows + 1})";
         sheet.Range[$"D{tableRows + 3}", $"D{tableRows + 3}"].NumberFormat = "[h]:mm:ss;@";
 
+        // Show app
+        app.Visible = true;
+
         var range = sheet.UsedRange;
         range.Columns.AutoFit();
         
         // Save the workbook
-        workbook.SaveAs(timeSheetPath.Replace(".csv", ".xlsx"), Excel.XlFileFormat.xlOpenXMLWorkbook);
+        try
+        {
+            workbook.SaveAs(timeSheetPath.Replace(".csv", ".xlsx"), Excel.XlFileFormat.xlOpenXMLWorkbook);
+        }
+        catch
+        {
+            // User pressed "don't save", which throws an exception
+            // NOOP
+        }
     }
 }
